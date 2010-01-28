@@ -452,7 +452,12 @@ module DataMapper
 
         all(query.merge(:repository => source_repository_name)).each do |resource|
           new_resource = new
-          query[:fields].each { |property| property.set(new_resource, property.get(resource)) }
+
+          query[:fields].each do |property|
+            new_resource._attributes.set(property, resource._attributes.get(property))
+            property.set(new_resource, property.get(resource))
+          end
+
           resources << new_resource if new_resource.save
         end
 
@@ -511,6 +516,7 @@ module DataMapper
                 value = property.type.load(value, property)
               end
 
+              resource._attributes.set!(property.name, value)
               property.set!(resource, value)
             end
 
@@ -527,6 +533,9 @@ module DataMapper
 
             fields.each do |property|
               next if no_reload && property.loaded?(resource)
+
+              resource._attributes.set!(property.name,
+                record._attributes.get!(property.name))
 
               property.set!(resource, property.get!(record))
             end

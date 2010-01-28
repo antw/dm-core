@@ -263,6 +263,16 @@ module DataMapper
       attributes
     end
 
+    # Gets the AttributeSet for the Resource instance
+    #
+    # @return [AttributeSet]
+    #   The attributes
+    #
+    # @api public
+    def _attributes
+      @_attributes ||= AttributeSet.new(self)
+    end
+
     # Assign values to multiple attributes in one call (mass assignment)
     #
     # @param [Hash] attributes
@@ -647,6 +657,7 @@ module DataMapper
     # @api public
     def initialize(attributes = {}, &block) # :nodoc:
       self.attributes = attributes
+      @_attributes = AttributeSet.new(self, attributes)
     end
 
     # Returns name of the repository this object
