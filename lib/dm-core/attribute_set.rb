@@ -222,7 +222,11 @@ module DataMapper
     # @api public
     def inspect
       attrs = @properties.map do |property|
-        "#{property.name}=#{@values[property.name].inspect}"
+        if loaded?(property)
+          "#{property.name}=#{@values[property.name].inspect}"
+        else
+          "#{property.name}=<not loaded>"
+        end
       end
 
       "#<#{self.class} #{attrs.join(' ')}>"
