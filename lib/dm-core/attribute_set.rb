@@ -36,9 +36,10 @@ module DataMapper
 
     # Returns the value of the +name+ attribute
     #
-    # @param [Property, Symbol] name
+    # @param [Property, Symbol, PropertySet] name
     #   The property -- or the name of the property -- whose value is to be
-    #   retrieved.
+    #   retrieved. If you supply a PropertySet, an Array containing the value
+    #   of each attribute in the set will instead be returned.
     #
     # @return [Object, nil]
     #   Returns the attribute value, or nil if no such property exists in the
@@ -50,6 +51,12 @@ module DataMapper
     #
     # @api public
     def get(name)
+      if name.kind_of?(DataMapper::PropertySet)
+        # Was given a PropertySet, so we create an Array with each property's
+        # value (useful when retrieving composite keys, etc).
+        return name.map { |property| get(property) }
+      end
+
       unless property = property_for(name)
         raise ArgumentError, "The property '#{name}' does not exist " \
                              "in #{@resource.model}"
@@ -57,7 +64,6 @@ module DataMapper
 
       unless loaded?(property.name) or resource.new?
         load_lazy_attributes!(property)
-        # lazy_load(resource) unless loaded?(resource) || resource.new?
       end
 
       if loaded?(property)
@@ -73,7 +79,7 @@ module DataMapper
 
     # Sets the value of the +name+ attribute
     #
-    # @param [Property] name
+    # @param [Property, Symbol] name
     #   The property -- or the name of the property -- whose value is to be
     #   set.
     # @param [Object] value
@@ -88,6 +94,13 @@ module DataMapper
     #
     # @api public
     def set(name, value)
+      if name.kind_of?(DataMapper::PropertySet)
+        # Was given a PropertySet, so we set each value it contains (useful
+        # when setting composite keys, etc).
+        name.each_with_index { |property, idx| set(property, value[idx]) }
+        return get(name)
+      end
+
       unless property = property_for(name)
         raise ArgumentError, "The property '#{name}' does not exist " \
                              "in #{@resource.model}"

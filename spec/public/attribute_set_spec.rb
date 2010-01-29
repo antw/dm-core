@@ -13,6 +13,13 @@ describe DataMapper::AttributeSet do
       property :priv, String, :accessor => :private
     end
 
+    class ::CompositeKeyResource
+      include DataMapper::Resource
+
+      property :id_one, Integer, :key => true
+      property :id_two, Integer, :key => true
+    end
+
     @model = Person
   end
 
@@ -62,6 +69,22 @@ describe DataMapper::AttributeSet do
 
       end
 
+      describe 'when given a PropertySet' do
+        before(:each) do
+          @property_set = CompositeKeyResource.key
+          @resource     = CompositeKeyResource.new(:id_one => 1, :id_two => 2)
+          @attributes   = @resource._attributes
+        end
+
+        it 'should return an array' do
+          @attributes.get(@property_set).should be_kind_of(Array)
+        end
+
+        it 'should contain the value of each attribute' do
+          @attributes.get(@property_set).should == [1, 2]
+        end
+      end
+
     end # when the attribute is not loaded
   end # get
 
@@ -90,6 +113,23 @@ describe DataMapper::AttributeSet do
     it 'should raise an ArgumentError if no property is given' do
       running_this = lambda { @attributes.set(nil, 1) }
       running_this.should raise_error(ArgumentError)
+    end
+
+    describe 'when given a PropertySet' do
+      before(:each) do
+        @property_set = CompositeKeyResource.key
+        @attributes   = CompositeKeyResource.new._attributes
+      end
+
+      it 'should return the given values' do
+        @attributes.set(@property_set, [1, 2]).should == [1, 2]
+      end
+
+      it 'should set the value of each attribute' do
+        @attributes.set(@property_set, [1, 2])
+        @attributes.get(:id_one).should == 1
+        @attributes.get(:id_two).should == 2
+      end
     end
   end # set
 
