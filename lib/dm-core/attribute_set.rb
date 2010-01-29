@@ -279,6 +279,36 @@ module DataMapper
       @values.key?(name_for(property))
     end
 
+    # Removes the loaded value for an attribute
+    #
+    # The next time it is requested it will be loaded from the repository
+    #
+    # @param [Property, Symbol, PropertySet] name
+    #   The property -- or the name of the property -- whose value is to be
+    #   set as clean.
+    #
+    # @return [nil]
+    #
+    # @api semipublic
+    def unload_attribute(name)
+      @values.delete(name_for(name))
+      mark_attribute_clean(name)
+    end
+
+    # Sets that an attribute is not dirty, clearing the original value
+    #
+    # @param [Property, Symbol, PropertySet] name
+    #   The property -- or the name of the property -- whose value is to be
+    #   set as clean.
+    #
+    # @return [nil]
+    #
+    # @api private
+    def mark_attribute_clean(name)
+      original.delete(name_for(name))
+      nil
+    end
+
     private
 
     # Returns the property identified by +name+

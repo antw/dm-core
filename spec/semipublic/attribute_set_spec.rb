@@ -256,4 +256,25 @@ describe DataMapper::AttributeSet do
 
   end # dirty
 
+  describe '#unload_attribute' do
+    before(:each) do
+      @attributes = attribute_set
+      @attributes.set(:name, 'Michael Scarn')
+    end
+
+    it 'should return nil' do
+      @attributes.unload_attribute(:name).should be_nil
+    end
+
+    it 'should set the attribute as unloaded' do
+      running_this = lambda { @attributes.unload_attribute(:name) }
+      running_this.should change { @attributes.loaded?(:name) }.to(false)
+    end
+
+    it 'should remove the original value' do
+      running_this = lambda { @attributes.unload_attribute(:name) }
+      running_this.should change { @attributes.original.key?(:name) }.to(false)
+    end
+  end # unload_attribute
+
 end
