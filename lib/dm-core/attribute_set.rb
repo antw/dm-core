@@ -67,7 +67,7 @@ module DataMapper
       end
 
       if loaded?(property)
-        get!(property.name)
+        @values[property.name]
       elsif property.default?
         set(property, property.default_for(resource))
       else
@@ -79,7 +79,7 @@ module DataMapper
 
     # Sets the value of the +name+ attribute
     #
-    # @param [Property, Symbol] name
+    # @param [Property, Symbol, PropertySet] name
     #   The property -- or the name of the property -- whose value is to be
     #   set.
     # @param [Object] value
@@ -106,9 +106,9 @@ module DataMapper
                              "in #{@resource.model}"
       end
 
-      orig_value = resource.new? ? nil : get!(name)
-      new_value  = property.typecast(value)
       name       = property.name
+      new_value  = property.typecast(value)
+      orig_value = resource.new? ? nil : @values[name]
 
       if original.key?(name)
         # If the new value is the same as the original, the user has reset
@@ -119,16 +119,17 @@ module DataMapper
         original[name] = orig_value
       end
 
-      set!(property.name, new_value)
+      @values[property.name] = new_value
     end
 
     alias_method :[]=, :set
 
     # Returns the value of the +name+ attribute
     #
-    # @param [Symbol] name
-    #   The name of the property whose value is to be retrieved. NOTE: Does
-    #   _not_ accept a Property.
+    # @param [Property, Symbol, PropertySet] name
+    #   The property -- or the name of the property -- whose value is to be
+    #   retrieved. If you supply a PropertySet, an Array containing the value
+    #   of each attribute in the set will instead be returned.
     #
     # @return [Object, nil]
     #   Returns the attribute value, or nil if no such property exists in the
@@ -136,7 +137,11 @@ module DataMapper
     #
     # @api private
     def get!(name)
-      @values[name]
+      if name.kind_of?(DataMapper::PropertySet)
+        name.each_with_index { |property, idx| get!(property, value[idx]) }
+      else
+        @values[name_for(name)]
+      end
     end
 
     # Sets the value of the +name+ attribute directly
@@ -144,18 +149,23 @@ module DataMapper
     # Does not typecast or track that the attribute has changed. The
     # AttributeSet will _not_ be marked as dirty.
     #
-    # @param [Symbol] name
-    #   The name of the property whose value is to be set. NOTE: Does _not_
-    #   accept a Property.
+    # @param [Property, Symbol, PropertySet] name
+    #   The property -- or the name of the property -- whose value is to be
+    #   set. If you supply a PropertySet, an Array containing the value of
+    #   each attribute in the set will instead be returned.
     # @param [Object] value
     #   The value to set in the resource.
     #
     # @return [Object]
-    #   +value+ after being typecasted according to this property's primitive
+    #   Returns the given value.
     #
     # @api private
     def set!(name, value)
-      @values[name] = value
+      if name.kind_of?(DataMapper::PropertySet)
+        name.each_with_index { |property, idx| set!(property, value[idx]) }
+      else
+        @values[name] = value
+      end
     end
 
     # Checks if the set is dirty
@@ -200,7 +210,7 @@ module DataMapper
     # @api semipublic
     def dirty
       original.keys.inject({}) do |dirty, name|
-        dirty[property_for(name)] = get!(name) ; dirty
+        dirty[property_for(name)] = @values[name] ; dirty
       end
     end
 
@@ -245,7 +255,7 @@ module DataMapper
             else             property
           end
 
-          attributes[key] = get!(name)
+          attributes[key] = @values[name]
         end
       end
 
