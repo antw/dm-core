@@ -106,22 +106,17 @@ module DataMapper
                              "in #{@resource.model}"
       end
 
-      orig_value = get!(name)
+      orig_value = resource.new? ? nil : get!(name)
       new_value  = property.typecast(value)
       name       = property.name
 
-      if resource.saved?
-        if original.key?(name)
-          # If the new value is the same as the original, the user has reset
-          # it; remove the key. Otherwise they've already changed the value at
-          # least once; leave the original alone.
-          original.delete(name) if original[name] == new_value
-        elsif new_value != orig_value
-          original[name] = orig_value
-        end
-      else
-        # Unsaved resources should always track changed attributes.
-        original[name] = nil
+      if original.key?(name)
+        # If the new value is the same as the original, the user has reset
+        # it; remove the key. Otherwise they've already changed the value at
+        # least once; leave the original alone.
+        original.delete(name) if original[name] == new_value
+      elsif new_value != orig_value
+        original[name] = orig_value
       end
 
       set!(property.name, new_value)
@@ -197,7 +192,17 @@ module DataMapper
       @original_values ||= {}
     end
 
-    # Returns the AttributeSet's original values.
+    # Hash of attributes that have unsaved changed and their values
+    #
+    # @return [Hash]
+    #   Attributes which have unsaved changed
+    #
+    # @api semipublic
+    def dirty
+      original.keys.inject({}) do |dirty, name|
+        dirty[property_for(name)] = get!(name) ; dirty
+      end
+    end
 
     # Get a Human-readable representation of this AttributeSet instance
     #

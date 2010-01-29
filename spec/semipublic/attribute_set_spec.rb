@@ -103,10 +103,10 @@ describe DataMapper::AttributeSet do
         @attribute_set.original.should == { :name => nil }
       end
 
-      it 'should contain a restored value' do
+      it 'should not contain a restored value' do
         @attribute_set.set(:name, 'Michael Scarn')
         @attribute_set.set(:name, nil)
-        @attribute_set.original.should == { :name => nil }
+        @attribute_set.original.should be_empty
       end
 
       it 'should not have a key for unset default attributes' do
@@ -173,5 +173,87 @@ describe DataMapper::AttributeSet do
     end # supported_by
 
   end # original
+
+  it { attribute_set.should respond_to(:dirty) }
+
+  describe '#dirty' do
+    before(:each) do
+      @attribute_set = attribute_set
+    end
+
+    it 'should return a Hash' do
+      @attribute_set.dirty.should be_kind_of(Hash)
+    end
+
+    describe 'when the resource is new' do
+      it 'should be empty when no values have been set' do
+        @attribute_set.dirty.should be_empty
+      end
+
+      it 'should contain dirty attributes' do
+        @attribute_set.set(:name, 'Michael Scarn')
+        @attribute_set.dirty.should == {
+          @model.properties[:name] => 'Michael Scarn'
+        }
+      end
+
+      it 'should not contain a restored value' do
+        @attribute_set.set(:name, 'Michael Scarn')
+        @attribute_set.set(:name, nil)
+        @attribute_set.dirty.should be_empty
+      end
+
+      it 'should contain the default value of an attribute' do
+        @attribute_set.dirty.keys.should_not include(:job)
+      end
+
+      it 'should contain the value of an attribute which has a default' do
+        @attribute_set.set(:job, 'Boss')
+        @attribute_set.dirty.should == { @model.properties[:job] => 'Boss' }
+      end
+    end # when the resource is new
+
+    supported_by :all do
+
+      describe 'when the resource is persisted' do
+        before(:each) do
+          @attribute_set.set(:name, 'Michael Scarn')
+          @attribute_set.resource.save.should be_true
+        end
+
+        it 'should be empty' do
+          pending 'Awaiting support for saving an AttributeSet' do
+            @attribute_set.dirty.should be_empty
+          end
+        end
+
+        it 'should contain the value of changed attributes' do
+          pending 'Awaiting support for saving an AttributeSet' do
+            @attribute_set.set(:name, 'Catherine Zeta')
+            @attribute_set.dirty.should == {
+              @model.properties[:name] => 'Catherine Zeta'
+            }
+          end
+        end
+
+        it 'should not contain the current value' do
+          pending 'Awaiting support for saving an AttributeSet' do
+            @attribute_set.set(:name, 'Michael Scarn')
+            @attribute_set.dirty.should be_empty
+          end
+        end
+
+        it 'should not contain a restored value' do
+          pending 'Awaiting support for saving an AttributeSet' do
+            @attribute_set.set(:name, 'Catherine Zeta')
+            @attribute_set.set(:name, 'Michael Scarn')
+            @attribute_set.dirty.should be_empty
+          end
+        end
+      end # when the resource is persisted
+
+    end # supported_by
+
+  end # dirty
 
 end
