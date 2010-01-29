@@ -174,12 +174,25 @@ module DataMapper
     # been changed, or if the the attached resource is new and has a serial
     # property, or any properties with default values.
     #
-    # return [Boolean]
+    # @return [Boolean]
     #   True if the attribute set is dirty and may be persisted.
     #
     # @api public
     def dirty?
       not original.empty?
+    end
+
+    # Checks if the +name+ attribute is dirty
+    #
+    # @param [Symbol, Property] property
+    #   A property to be checked, or the Symbol name of the property.
+    #
+    # @return [Boolean]
+    #   True if the named attribute is dirty.
+    #
+    # @api semipublic
+    def attribute_dirty?(name)
+      original.key?(name_for(name))
     end
 
     # Marks the AttributeSet as being not dirty

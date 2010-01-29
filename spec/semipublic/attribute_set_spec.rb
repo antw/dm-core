@@ -256,6 +256,50 @@ describe DataMapper::AttributeSet do
 
   end # dirty
 
+  it { attribute_set.should respond_to(:attribute_dirty?) }
+
+  describe '#attribute_dirty?' do
+    before(:each) do
+      @attribute_set = attribute_set
+    end
+
+    describe 'when the resource is new' do
+      it 'should return false if the attribute has not been set' do
+        @attribute_set.attribute_dirty?(:name).should be_false
+      end
+
+      it 'should return true if the attribute has been set' do
+        @attribute_set.set(:name, 'Samuel L. Chang')
+        @attribute_set.attribute_dirty?(:name).should be_true
+      end
+    end
+
+    supported_by :all do
+
+      describe 'on a persisted resource' do
+        before(:each) do
+          @attribute_set.set(:name, 'Michael Scarn')
+          @attribute_set.resource.save.should be_true
+        end
+
+        it 'should return false if the attribute has not been changed' do
+          pending 'Awaiting support for saving an AttributeSet' do
+            @attribute_set.attribute_dirty?(:name).should be_false
+          end
+        end
+
+        it 'should return true if the attribute has been changed' do
+          pending 'Awaiting support for saving an AttributeSet' do
+            @attribute_set.set(:name, 'Samuel L. Chang')
+            @attribute_set.attribute_dirty?(:name).should be_true
+          end
+        end
+      end # on a persisted resource
+
+    end # supported_by :all
+
+  end # dirty_attribute?
+
   describe '#unload_attribute' do
     before(:each) do
       @attributes = attribute_set
