@@ -266,6 +266,19 @@ module DataMapper
       attributes
     end
 
+    # Check if the attribute corresponding to the property is loaded
+    #
+    # @param [Symbol, Property] property
+    #   A property to be checked, or the Symbol name of the property.
+    #
+    # @return [Boolean]
+    #   True if the attribute is loaded.
+    #
+    # @api semipublic
+    def loaded?(property)
+      @values.key?(name_for(property))
+    end
+
     private
 
     # Returns the property identified by +name+
@@ -295,19 +308,6 @@ module DataMapper
     # @api private
     def name_for(property)
       (prop = property_for(property)) && prop.name
-    end
-
-    # Check if the attribute corresponding to the property is loaded
-    #
-    # @param [Symbol, Property] property
-    #   A property to be checked, or the Symbol name of the property.
-    #
-    # @return [Boolean]
-    #   True if the attribute is loaded.
-    #
-    # @api semipublic
-    def loaded?(property)
-      @values.key?(name_for(property))
     end
 
     def load_lazy_attributes!(with)
