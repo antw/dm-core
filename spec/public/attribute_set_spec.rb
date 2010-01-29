@@ -258,11 +258,14 @@ describe DataMapper::AttributeSet do
 
   end # supported_by :all
 
-
-  it { pending ; @attributes.should respond_to(:not_dirty!) }
+  it { @attributes.should respond_to(:not_dirty!) }
 
   describe '#not_dirty!' do
-    it 'should mark the AttributeSet as not being dirty'
+    it 'should mark the AttributeSet as not being dirty' do
+      set = attribute_set
+      set.set(:name, 'Michael Scarn')
+      lambda { set.not_dirty! }.should change(set, :dirty?).to(false)
+    end
   end
 
   describe 'when triggering lazy loading' do
