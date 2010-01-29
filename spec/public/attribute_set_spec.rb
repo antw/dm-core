@@ -141,9 +141,9 @@ describe DataMapper::AttributeSet do
         @attributes.should_not be_dirty
       end
 
-      it 'should be false when an attribute has been set' do
+      it 'should be true when an attribute has been set' do
         @attributes.set(:name, 'Michael Scarn')
-        @attributes.should_not be_dirty
+        @attributes.should be_dirty
       end
     end # when the resource is new
 

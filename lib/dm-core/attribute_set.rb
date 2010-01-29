@@ -119,6 +119,9 @@ module DataMapper
         elsif new_value != orig_value
           original[name] = orig_value
         end
+      else
+        # Unsaved resources should always track changed attributes.
+        original[name] = nil
       end
 
       set!(property.name, new_value)

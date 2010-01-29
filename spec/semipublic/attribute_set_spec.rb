@@ -98,15 +98,30 @@ describe DataMapper::AttributeSet do
         @attribute_set.original.should be_empty
       end
 
-      it 'should not contain default values when a new value is set' do
-        @attribute_set.set(:job, 'CEO')
-        @attribute_set.original.should be_empty
+      it 'should have a key for changed values, with a nil value' do
+        @attribute_set.set(:name, 'Michael Scarn')
+        @attribute_set.original.should == { :name => nil }
       end
 
-      it 'should not contain a non-default value when a value is set' do
+      it 'should contain a restored value' do
+        @attribute_set.set(:name, 'Michael Scarn')
+        @attribute_set.set(:name, nil)
+        @attribute_set.original.should == { :name => nil }
+      end
+
+      it 'should not have a key for unset default attributes' do
+        @attribute_set.original.keys.should_not include(:job)
+      end
+
+      it 'should have a key for set default attributes, with a nil value' do
+        @attribute_set.set(:job, 'Boss')
+        @attribute_set.original.should == { :job => nil }
+      end
+
+      it 'should should retain nil as the value when several values are set' do
         @attribute_set.set(:name, 'Michael Scarn')
         @attribute_set.set(:name, 'Samuel L. Chang')
-        @attribute_set.original.should be_empty
+        @attribute_set.original.should == { :name => nil }
       end
     end # when the resource is new
 
@@ -119,29 +134,39 @@ describe DataMapper::AttributeSet do
         end
 
         it 'should be empty' do
-          @attribute_set.original.should be_empty
+          pending 'Awaiting support for saving an AttributeSet' do
+            @attribute_set.original.should be_empty
+          end
         end
 
         it 'should contain the value of changed attributes' do
-          @attribute_set.set(:name, 'Catherine Zeta')
-          @attribute_set.original.should == { :name => 'Michael Scarn' }
+          pending 'Awaiting support for saving an AttributeSet' do
+            @attribute_set.set(:name, 'Catherine Zeta')
+            @attribute_set.original.should == { :name => 'Michael Scarn' }
+          end
         end
 
         it 'should not contain the current value' do
-          @attribute_set.set(:name, 'Michael Scarn')
-          @attribute_set.original.should be_empty
+          pending 'Awaiting support for saving an AttributeSet' do
+            @attribute_set.set(:name, 'Michael Scarn')
+            @attribute_set.original.should be_empty
+          end
         end
 
         it 'should not contain a restored value' do
-          @attribute_set.set(:name, 'Catherine Zeta')
-          @attribute_set.set(:name, 'Michael Scarn')
-          @attribute_set.original.should be_empty
+          pending 'Awaiting support for saving an AttributeSet' do
+            @attribute_set.set(:name, 'Catherine Zeta')
+            @attribute_set.set(:name, 'Michael Scarn')
+            @attribute_set.original.should be_empty
+          end
         end
 
         it 'should store the original value when several new values are set' do
-          @attribute_set.set(:name, 'Catherine Zeta')
-          @attribute_set.set(:name, 'Samuel L. Chang')
-          @attribute_set.original.should == { :name => 'Michael Scarn' }
+          pending 'Awaiting support for saving an AttributeSet' do
+            @attribute_set.set(:name, 'Catherine Zeta')
+            @attribute_set.set(:name, 'Samuel L. Chang')
+            @attribute_set.original.should == { :name => 'Michael Scarn' }
+          end
         end
       end # when the resource is persisted
 
