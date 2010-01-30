@@ -103,10 +103,10 @@ describe DataMapper::AttributeSet do
         @attribute_set.original.should == { :name => nil }
       end
 
-      it 'should not contain a restored value' do
+      it 'should contain a restored value' do
         @attribute_set.set(:name, 'Michael Scarn')
         @attribute_set.set(:name, nil)
-        @attribute_set.original.should be_empty
+        @attribute_set.original.should == { :name => nil }
       end
 
       it 'should not have a key for unset default attributes' do
@@ -200,7 +200,7 @@ describe DataMapper::AttributeSet do
       it 'should not contain a restored value' do
         @attribute_set.set(:name, 'Michael Scarn')
         @attribute_set.set(:name, nil)
-        @attribute_set.dirty.should be_empty
+        @attribute_set.dirty.should == { :name => nil }
       end
 
       it 'should contain the default value of an attribute' do

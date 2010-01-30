@@ -108,15 +108,19 @@ module DataMapper
 
       name       = property.name
       new_value  = property.typecast(value)
-      orig_value = resource.new? ? nil : @values[name]
+      orig_value = @values[name]
 
-      if original.key?(name)
-        # If the new value is the same as the original, the user has reset
-        # it; remove the key. Otherwise they've already changed the value at
-        # least once; leave the original alone.
-        original.delete(name) if original[name] == new_value
-      elsif new_value != orig_value
-        original[name] = orig_value
+      if resource.new?
+        original[name] = nil
+      else
+        if original.key?(name)
+          # If the new value is the same as the original, the user has reset
+          # it; remove the key. Otherwise they've already changed the value at
+          # least once; leave the original alone.
+          original.delete(name) if original[name] == new_value
+        elsif new_value != orig_value
+          original[name] = orig_value
+        end
       end
 
       @values[property.name] = new_value
