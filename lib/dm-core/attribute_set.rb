@@ -141,7 +141,7 @@ module DataMapper
     # @api private
     def get!(name)
       if name.kind_of?(DataMapper::PropertySet)
-        name.each_with_index { |property, idx| get!(property, value[idx]) }
+        return name.map { |property| get!(property) }
       else
         @values[name_for(name)]
       end
