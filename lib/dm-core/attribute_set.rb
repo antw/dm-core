@@ -238,7 +238,7 @@ module DataMapper
     # @api public
     def inspect
       attrs = @properties.map do |property|
-        if loaded?(property)
+        if loaded?(property) || resource.new?
           "#{property.name}=#{@values[property.name].inspect}"
         else
           "#{property.name}=<not loaded>"
