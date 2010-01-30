@@ -100,13 +100,13 @@ describe DataMapper::AttributeSet do
 
       it 'should have a key for changed values, with a nil value' do
         @attribute_set.set(:name, 'Michael Scarn')
-        @attribute_set.original.should == { :name => nil }
+        @attribute_set.original.should == { @model.properties[:name] => nil }
       end
 
       it 'should contain a restored value' do
         @attribute_set.set(:name, 'Michael Scarn')
         @attribute_set.set(:name, nil)
-        @attribute_set.original.should == { :name => nil }
+        @attribute_set.original.should == { @model.properties[:name] => nil }
       end
 
       it 'should not have a key for unset default attributes' do
@@ -115,13 +115,13 @@ describe DataMapper::AttributeSet do
 
       it 'should have a key for set default attributes, with a nil value' do
         @attribute_set.set(:job, 'Boss')
-        @attribute_set.original.should == { :job => nil }
+        @attribute_set.original.should == { @model.properties[:job] => nil }
       end
 
       it 'should should retain nil as the value when several values are set' do
         @attribute_set.set(:name, 'Michael Scarn')
         @attribute_set.set(:name, 'Samuel L. Chang')
-        @attribute_set.original.should == { :name => nil }
+        @attribute_set.original.should == { @model.properties[:name] => nil }
       end
     end # when the resource is new
 
@@ -142,7 +142,9 @@ describe DataMapper::AttributeSet do
         it 'should contain the value of changed attributes' do
           pending 'Awaiting support for saving an AttributeSet' do
             @attribute_set.set(:name, 'Catherine Zeta')
-            @attribute_set.original.should == { :name => 'Michael Scarn' }
+            @attribute_set.original.should == {
+              @model.properties[:name] => 'Michael Scarn'
+            }
           end
         end
 
@@ -165,7 +167,9 @@ describe DataMapper::AttributeSet do
           pending 'Awaiting support for saving an AttributeSet' do
             @attribute_set.set(:name, 'Catherine Zeta')
             @attribute_set.set(:name, 'Samuel L. Chang')
-            @attribute_set.original.should == { :name => 'Michael Scarn' }
+            @attribute_set.original.should == {
+              @model.properties[:name] => 'Michael Scarn'
+            }
           end
         end
       end # when the resource is persisted
@@ -200,7 +204,7 @@ describe DataMapper::AttributeSet do
       it 'should not contain a restored value' do
         @attribute_set.set(:name, 'Michael Scarn')
         @attribute_set.set(:name, nil)
-        @attribute_set.dirty.should == { :name => nil }
+        @attribute_set.dirty.should == { @model.properties[:name] => nil }
       end
 
       it 'should contain the default value of an attribute' do
@@ -317,7 +321,9 @@ describe DataMapper::AttributeSet do
 
     it 'should remove the original value' do
       running_this = lambda { @attributes.unload_attribute(:name) }
-      running_this.should change { @attributes.original.key?(:name) }.to(false)
+      running_this.should change {
+        @attributes.original.key?(@model.properties[:name])
+      }.to(false)
     end
   end # unload_attribute
 

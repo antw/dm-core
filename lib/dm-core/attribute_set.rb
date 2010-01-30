@@ -106,20 +106,19 @@ module DataMapper
                              "in #{@resource.model}"
       end
 
-      name       = property.name
       new_value  = property.typecast(value)
       orig_value = @values[name]
 
       if resource.new?
-        original[name] = nil
+        original[property] = nil
       else
-        if original.key?(name)
+        if original.key?(property)
           # If the new value is the same as the original, the user has reset
           # it; remove the key. Otherwise they've already changed the value at
           # least once; leave the original alone.
-          original.delete(name) if original[name] == new_value
+          original.delete(property) if original[property] == new_value
         elsif new_value != orig_value
-          original[name] = orig_value
+          original[property] = orig_value
         end
       end
 
@@ -196,7 +195,7 @@ module DataMapper
     #
     # @api semipublic
     def attribute_dirty?(name)
-      original.key?(name_for(name))
+      original.key?(property_for(name))
     end
 
     # Marks the AttributeSet as being not dirty
@@ -226,8 +225,8 @@ module DataMapper
     #
     # @api semipublic
     def dirty
-      original.keys.inject({}) do |dirty, name|
-        dirty[property_for(name)] = @values[name] ; dirty
+      original.keys.inject({}) do |dirty, property|
+        dirty[property] = @values[property.name] ; dirty
       end
     end
 
@@ -322,7 +321,7 @@ module DataMapper
     #
     # @api private
     def mark_attribute_clean(name)
-      original.delete(name_for(name))
+      original.delete(property_for(name))
       nil
     end
 
