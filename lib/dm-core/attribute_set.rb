@@ -325,6 +325,16 @@ module DataMapper
       nil
     end
 
+    protected
+
+    # Ensures that the internal data structures are duplicated
+    #
+    # @api private
+    def initialize_copy(*)
+      @values   = @values.dup
+      @original = original.dup
+    end
+
     private
 
     # Returns the property identified by +name+
