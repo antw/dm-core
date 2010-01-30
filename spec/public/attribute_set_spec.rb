@@ -28,7 +28,7 @@ describe DataMapper::AttributeSet do
   end
 
   before(:each) do
-    @resource   = Person.new(:name => 'Michael Scarn')
+    @resource   = Person.new
     @attributes = @resource._attributes
   end
 
@@ -38,7 +38,8 @@ describe DataMapper::AttributeSet do
 
   describe '#get' do
     it 'should return the attribute value' do
-      @attributes.get(:name).should == 'Michael Scarn'
+      attributes = Person.new(:name => 'Michael Scarn')._attributes
+      attributes.get(:name).should == 'Michael Scarn'
     end
 
     describe 'when the attribute is not loaded' do
