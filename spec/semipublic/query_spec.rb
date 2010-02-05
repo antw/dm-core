@@ -1446,7 +1446,7 @@ describe DataMapper::Query do
     describe "##{method}" do
       supported_by :all do
         before :all do
-          @key = @model.key(@repository.name)
+          @key = @model.key
 
           @self_relationship = DataMapper::Associations::OneToMany::Relationship.new(
             :self,
@@ -1943,7 +1943,7 @@ describe DataMapper::Query do
     describe "##{method}" do
       supported_by :all do
         before :all do
-          @key = @model.key(@repository.name)
+          @key = @model.key
 
           @self_relationship = DataMapper::Associations::OneToMany::Relationship.new(
             :self,
@@ -3078,7 +3078,7 @@ describe DataMapper::Query do
     describe "##{method}" do
       supported_by :all do
         before :all do
-          @key = @model.key(@repository.name)
+          @key = @model.key
 
           @self_relationship = DataMapper::Associations::OneToMany::Relationship.new(
             :self,

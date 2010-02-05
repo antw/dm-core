@@ -55,7 +55,7 @@ module DataMapper
         super                                                                   ||
         (defined?(@property) && @property.respond_to?(method, include_private)) ||
         @model.relationships(@repository_name).key?(method)                     ||
-        @model.properties(@repository_name).named?(method)
+        @model.properties.named?(method)
       end
 
       private
@@ -72,7 +72,7 @@ module DataMapper
         @model            = last_relationship.target_model
 
         if property_name
-          @property = @model.properties(@repository_name)[property_name] ||
+          @property = @model.properties[property_name] ||
             raise(ArgumentError, "Unknown property '#{property_name}' in #{@model}")
         end
       end
@@ -89,7 +89,7 @@ module DataMapper
           return path_class.new(@relationships.dup << relationship)
         end
 
-        if @model.properties(@repository_name).named?(method)
+        if @model.properties.named?(method)
           return path_class.new(@relationships, method)
         end
 

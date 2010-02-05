@@ -84,7 +84,7 @@ module DataMapper
     def key
       return @_key if defined?(@_key)
 
-      model_key = model.key(repository_name)
+      model_key = model.key
 
       key = model_key.map do |property|
         original_attributes[property] || (property.loaded?(self) ? property.get!(self) : nil)
@@ -672,7 +672,7 @@ module DataMapper
     #
     # @api private
     def properties
-      model.properties(repository_name)
+      model.properties
     end
 
     # Gets this instance's Model's relationships
@@ -783,7 +783,7 @@ module DataMapper
     def conditions
       key = self.key
       if key
-        model.key_conditions(repository, key)
+        model.key_conditions(key)
       else
         conditions = {}
         properties.each do |property|

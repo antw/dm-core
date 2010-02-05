@@ -106,7 +106,7 @@ module DataMapper
       # @api semipublic
       def upgrade_model_storage(model)
         name       = self.name
-        properties = model.properties_with_subclasses(name)
+        properties = model.properties_with_subclasses
 
         if success = create_model_storage(model)
           return properties
@@ -131,7 +131,7 @@ module DataMapper
       # @api semipublic
       def create_model_storage(model)
         name       = self.name
-        properties = model.properties_with_subclasses(name)
+        properties = model.properties_with_subclasses
 
         return false if storage_exists?(model.storage_name(name))
         return false if properties.empty?
@@ -286,12 +286,12 @@ module DataMapper
 
         # @api private
         def indexes(model)
-          model.properties(name).indexes
+          model.properties.indexes
         end
 
         # @api private
         def unique_indexes(model)
-          model.properties(name).unique_indexes
+          model.properties.unique_indexes
         end
       end # module SQL
 
@@ -572,7 +572,7 @@ module DataMapper
         #
         # @api private
         def filter_indexes(model, indexes)
-          field_map = model.properties(name).field_map
+          field_map = model.properties.field_map
           indexes.select do |index_name, fields|
             fields.all? { |field| field_map[field].type != Types::Text }
           end
@@ -887,7 +887,7 @@ module DataMapper
       # @api semipublic
       def create_model_storage(model)
         name       = self.name
-        properties = model.properties_with_subclasses(name)
+        properties = model.properties_with_subclasses
         table_name = model.storage_name(name)
         truncate_or_delete = self.class.auto_migrate_with
         table_is_truncated = truncate_or_delete && @truncated_tables && @truncated_tables[table_name]
@@ -984,7 +984,7 @@ module DataMapper
         def create_sequence_statements(model)
           name       = self.name
           table_name = model.storage_name(name)
-          serial     = model.serial(name)
+          serial     = model.serial
 
           statements = []
           if sequence_name = model_sequence_name(model)
@@ -1058,7 +1058,7 @@ module DataMapper
         def model_sequence_name(model)
           name       = self.name
           table_name = model.storage_name(name)
-          serial     = model.serial(name)
+          serial     = model.serial
 
           if serial
             serial.options[:sequence] || default_sequence_name(table_name)

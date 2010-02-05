@@ -215,9 +215,9 @@ module DataMapper
       assert_valid_key_size(key)
 
       repository = self.repository
-      key        = self.key(repository.name).typecast(key)
+      key        = self.key.typecast(key)
 
-      repository.identity_map(self)[key] || first(key_conditions(repository, key))
+      repository.identity_map(self)[key] || first(key_conditions(key))
     end
 
     # Grab a single record just like #get, but raise an ObjectNotFoundError
@@ -441,18 +441,18 @@ module DataMapper
     #
     # @api public
     def copy(source_repository_name, target_repository_name, query = {})
-      target_properties = properties(target_repository_name)
-
-      query[:fields] ||= properties(source_repository_name).select do |property|
-        target_properties.include?(property)
-      end
+      query[:fields] ||= properties
 
       repository(target_repository_name) do |repository|
         resources = []
 
         all(query.merge(:repository => source_repository_name)).each do |resource|
           new_resource = new
-          query[:fields].each { |property| property.set(new_resource, property.get(resource)) }
+
+          query[:fields].each do |property|
+            property.set(new_resource, property.get(resource))
+          end
+
           resources << new_resource if new_resource.save
         end
 
@@ -474,7 +474,7 @@ module DataMapper
       repository      = query.repository
       repository_name = repository.name
       fields          = query.fields
-      discriminator   = properties(repository_name).discriminator
+      discriminator   = properties.discriminator
       no_reload       = !query.reload?
 
       field_map = fields.map { |property| [ property, property.field ] }.to_hash
@@ -491,7 +491,7 @@ module DataMapper
             field_map.each { |property, field| record[property] = record.delete(field) if record.key?(field) }
 
             model     = discriminator && record[discriminator] || self
-            model_key = model.key(repository_name)
+            model_key = model.key
 
             resource = if model_key.valid?(key_values = record.values_at(*model_key))
               identity_map = repository.identity_map(model)
@@ -557,7 +557,7 @@ module DataMapper
 
     # @api semipublic
     def default_order(repository_name = default_repository_name)
-      @default_order[repository_name] ||= key(repository_name).map { |property| Query::Direction.new(property) }.freeze
+      @default_order[repository_name] ||= key.map { |property| Query::Direction.new(property) }.freeze
     end
 
     # Get the repository with a given name, or the default one for the current
@@ -604,9 +604,13 @@ module DataMapper
     #   The Set of repositories for which this Model
     #   has been defined (beyond default)
     #
+    # @todo
+    #   With the removal of per-repository properties it might be possible to
+    #   remove this.
+    #
     # @api private
     def repositories
-      [ repository ].to_set + @properties.keys.map { |repository_name| DataMapper.repository(repository_name) }
+      [ repository ].to_set
     end
 
     # @api private
@@ -694,12 +698,12 @@ module DataMapper
       name            = self.name
       repository_name = self.repository_name
 
-      if properties(repository_name).empty? &&
+      if properties.empty? &&
         !relationships(repository_name).any? { |(relationship_name, relationship)| relationship.kind_of?(Associations::ManyToOne::Relationship) }
         raise IncompleteModelError, "#{name} must have at least one property or many to one relationship to be valid"
       end
 
-      if key(repository_name).empty?
+      if key.empty?
         raise IncompleteModelError, "#{name} must have a key to be valid"
       end
 
@@ -747,7 +751,7 @@ module DataMapper
     #
     # @api private
     def assert_valid_key_size(key)
-      expected_key_size = self.key(repository_name).size
+      expected_key_size = self.key.size
       actual_key_size   = key.size
 
       if actual_key_size != expected_key_size

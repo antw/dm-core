@@ -24,7 +24,7 @@ module DataMapper
 
             def new(*args, &block)
               if args.size == 1 && args.first.kind_of?(Hash)
-                discriminator = properties(repository_name).discriminator
+                discriminator = properties.discriminator
                 model         = discriminator.typecast(args.first[discriminator.name])
 
                 if model.kind_of?(Model) && !model.equal?(self)

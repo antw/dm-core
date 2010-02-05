@@ -155,7 +155,7 @@ module DataMapper
       #
       # @api semipublic
       def initialize_serial(resource, next_id)
-        return unless serial = resource.model.serial(name)
+        return unless serial = resource.model.serial
         return unless serial.get!(resource).nil?
         serial.set!(resource, next_id)
 

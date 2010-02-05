@@ -104,7 +104,7 @@ module DataMapper
       if source.respond_to?(:query)
         source.query
       elsif source.kind_of?(Enumerable)
-        key        = model.key(repository.name)
+        key        = model.key
         conditions = Query.target_conditions(source, key, key)
         Query.new(repository, model, :conditions => conditions)
       else
@@ -723,7 +723,7 @@ module DataMapper
 
       repository_name = repository.name
 
-      @properties    = @model.properties(repository_name)
+      @properties    = @model.properties
       @relationships = @model.relationships(repository_name)
 
       assert_valid_options(@options)
@@ -1210,7 +1210,7 @@ module DataMapper
         append_condition(query_path, bind_value, model, operator)
       else
         repository_name = repository.name
-        subject         = model.properties(repository_name)[string] ||
+        subject         = model.properties[string] ||
                           model.relationships(repository_name)[string]
 
         append_condition(subject, bind_value, model, operator)

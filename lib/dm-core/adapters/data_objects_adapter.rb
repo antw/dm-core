@@ -82,14 +82,14 @@ module DataMapper
 
         resources.each do |resource|
           model      = resource.model
-          serial     = model.serial(name)
+          serial     = model.serial
           attributes = resource.dirty_attributes
 
           properties  = []
           bind_values = []
 
           # make the order of the properties consistent
-          model.properties(name).each do |property|
+          model.properties.each do |property|
             next unless attributes.key?(property)
 
             bind_value = attributes[property]
@@ -170,7 +170,7 @@ module DataMapper
         bind_values = []
 
         # make the order of the properties consistent
-        query.model.properties(name).each do |property|
+        query.model.properties.each do |property|
           next unless attributes.key?(property)
           properties  << property
           bind_values << attributes[property]
@@ -426,7 +426,7 @@ module DataMapper
 
           # TODO: DRY this up with delete_statement
           conditions_statement, bind_values = if query.limit || query.links.any?
-            subquery(query, model.key(name), false)
+            subquery(query, model.key, false)
           else
             conditions_statement(query.conditions)
           end
@@ -449,7 +449,7 @@ module DataMapper
 
           # TODO: DRY this up with update_statement
           conditions_statement, bind_values = if query.limit || query.links.any?
-            subquery(query, model.key(name), false)
+            subquery(query, model.key, false)
           else
             conditions_statement(query.conditions)
           end

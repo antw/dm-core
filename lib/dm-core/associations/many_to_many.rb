@@ -15,8 +15,7 @@ module DataMapper
         def child_key
           return @child_key if defined?(@child_key)
 
-          repository_name = child_repository_name || parent_repository_name
-          properties      = child_model.properties(repository_name)
+          properties      = child_model.properties
 
           @child_key = if @child_properties
             child_key = properties.values_at(*@child_properties)
@@ -363,7 +362,7 @@ module DataMapper
           assert_source_saved 'The source must be saved before mass-deleting the collection'
 
           model      = self.model
-          key        = model.key(repository_name)
+          key        = model.key
           conditions = Query.target_conditions(self, key, key)
 
           unless intermediaries.all(via => self).destroy!

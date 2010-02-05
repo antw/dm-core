@@ -170,7 +170,7 @@ module DataMapper
         @identity_map[key]
       else
         # current query is all inclusive, lookup using normal approach
-        first(model.key_conditions(repository, key))
+        first(model.key_conditions(key))
       end
     end
 
@@ -984,7 +984,7 @@ module DataMapper
     #
     # @api private
     def model_key
-      model.key(repository_name)
+      model.key
     end
 
     # Loaded Resources in the collection
@@ -1004,7 +1004,7 @@ module DataMapper
     #
     # @api private
     def properties
-      model.properties(repository_name)
+      model.properties
     end
 
     # Returns the Relationships for the Collection's Model

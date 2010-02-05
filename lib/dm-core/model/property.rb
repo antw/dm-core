@@ -12,21 +12,15 @@ module DataMapper
       extend Chainable
 
       def self.extended(model)
-        model.instance_variable_set(:@properties,               {})
         model.instance_variable_set(:@field_naming_conventions, {})
         model.instance_variable_set(:@paranoid_properties,      {})
       end
 
       chainable do
         def inherited(model)
-          model.instance_variable_set(:@properties,               {})
+          model.instance_variable_set(:@properties,               properties.dup)
           model.instance_variable_set(:@field_naming_conventions, @field_naming_conventions.dup)
           model.instance_variable_set(:@paranoid_properties,      @paranoid_properties.dup)
-
-          @properties.each do |repository_name, properties|
-            model_properties = model.properties(repository_name)
-            properties.each { |property| model_properties[property.name] ||= property }
-          end
 
           super
         end
@@ -49,24 +43,7 @@ module DataMapper
       # @api public
       def property(name, type, options = {})
         property = DataMapper::Property.new(self, name, type, options)
-
-        repository_name = self.repository_name
-        properties      = properties(repository_name)
-
         properties << property
-
-        # Add property to the other mappings as well if this is for the default
-        # repository.
-        if repository_name == default_repository_name
-          @properties.except(repository_name).each do |repository_name, properties|
-            next if properties.named?(name)
-
-            # make sure the property is created within the correct repository scope
-            DataMapper.repository(repository_name) do
-              properties << DataMapper::Property.new(self, name, type, options)
-            end
-          end
-        end
 
         # Add the property to the lazy_loads set for this resources repository
         # only.
@@ -85,7 +62,7 @@ module DataMapper
         # added after the child classes' properties have been copied from
         # the parent
         descendants.each do |descendant|
-          descendant.properties(repository_name)[name] ||= property
+          descendant.properties[name] ||= property
         end
 
         create_reader_for(property)
@@ -105,19 +82,14 @@ module DataMapper
       #   A list of Properties defined on this Model in the given Repository
       #
       # @api public
-      def properties(repository_name = default_repository_name)
-        # TODO: create PropertySet#copy that will copy the properties, but assign the
-        # new Relationship objects to a supplied repository and model.  dup does not really
-        # do what is needed
-        assert_kind_of 'repository_name', repository_name, Symbol
-
-        default_repository_name = self.default_repository_name
-
-        @properties[repository_name] ||= if repository_name == default_repository_name
-          PropertySet.new
-        else
-          properties(default_repository_name).dup
+      def properties(repository_name = nil)
+        unless repository_name.nil?
+          warn "Passing in +repository_name+ to Model#properties is " \
+               "deprecated; the method now returns all properties " \
+               "(#{caller[0]})"
         end
+
+        @properties ||= PropertySet.new
       end
 
       # Gets the list of key fields for this Model in +repository_name+
@@ -129,13 +101,24 @@ module DataMapper
       #   The list of key fields for this Model in +repository_name+
       #
       # @api public
-      def key(repository_name = default_repository_name)
-        properties(repository_name).key
+      def key(repository_name = nil)
+        unless repository_name.nil?
+          warn "Passing in +repository_name+ to Model#key is deprecated; " \
+               "the method now returns all relevant properties (#{caller[0]})"
+        end
+
+        properties.key
       end
 
       # @api public
-      def serial(repository_name = default_repository_name)
-        key(repository_name).detect { |property| property.serial? }
+      def serial(repository_name = nil)
+        unless repository_name.nil?
+          warn "Passing in +repository_name+ to Model#serial is " \
+               "deprecated; the method now returns all relevant " \
+               "properties (#{caller[0]})"
+        end
+
+        key.detect { |property| property.serial? }
       end
 
       # Gets the field naming conventions for this resource in the given Repository
@@ -153,11 +136,17 @@ module DataMapper
       end
 
       # @api private
-      def properties_with_subclasses(repository_name = default_repository_name)
+      def properties_with_subclasses(repository_name = nil)
+        unless repository_name.nil?
+          warn "Passing in +repository_name+ to " \
+               "Model#properties_with_subclasses is deprecated; the method " \
+               "now returns all relevant properties (#{caller[0]})"
+        end
+
         properties = PropertySet.new
 
         descendants.each do |model|
-          model.properties(repository_name).each do |property|
+          model.properties.each do |property|
             properties[property.name] ||= property
           end
         end
@@ -175,9 +164,16 @@ module DataMapper
         paranoid_properties[name] = block
       end
 
+      # @todo Once the deprecation notice is removed, *args can become +key+.
+      #
       # @api private
-      def key_conditions(repository, key)
-        self.key(repository.name).zip(key.nil? ? [] : key).to_hash
+      def key_conditions(*args)
+        key = args.pop
+
+        warn "Passing in +repository+ to Model#key_conditions is " \
+             "deprecated (#{caller[0]})" if args.any?
+
+        self.key.zip(key.nil? ? [] : key).to_hash
       end
 
       private
@@ -233,7 +229,7 @@ module DataMapper
       chainable do
         # @api public
         def method_missing(method, *args, &block)
-          if property = properties(repository_name)[method]
+          if property = properties[method]
             return property
           end
 

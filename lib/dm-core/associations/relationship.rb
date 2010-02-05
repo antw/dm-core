@@ -194,8 +194,7 @@ module DataMapper
       def child_key
         return @child_key if defined?(@child_key)
 
-        repository_name = child_repository_name || parent_repository_name
-        properties      = child_model.properties(repository_name)
+        properties = child_model.properties
 
         @child_key = if @child_properties
           child_key = properties.values_at(*@child_properties)
@@ -247,8 +246,7 @@ module DataMapper
       def parent_key
         return @parent_key if defined?(@parent_key)
 
-        repository_name = parent_repository_name || child_repository_name
-        properties      = parent_model.properties(repository_name)
+        properties = parent_model.properties
 
         @parent_key = if @parent_properties
           parent_key = properties.values_at(*@parent_properties)
@@ -519,7 +517,7 @@ module DataMapper
           # to reload itself, which is (currently) only possible if the
           # key was loaded.
           model     = target_model
-          model_key = model.key(repository.name)
+          model_key = model.key
 
           collection.model <= model                          &&
           (collection.query.fields & model_key) == model_key &&

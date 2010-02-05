@@ -630,7 +630,7 @@ module DataMapper
 
     # @api private
     def properties
-      @properties ||= model.properties(repository_name)
+      @properties ||= model.properties
     end
 
     # typecasts values into a primitive (Ruby class that backs DataMapper

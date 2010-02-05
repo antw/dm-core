@@ -129,7 +129,7 @@ module DataMapper
 
           conditions_statement, bind_values = conditions_statement(conditions, qualify)
 
-          model_key_column = columns_statement(model.key(name), qualify)
+          model_key_column = columns_statement(model.key, qualify)
           from_statement   = " FROM #{quote_name(model.storage_name(name))}"
 
           statement = "SELECT #{columns_statement(fields, qualify)}"

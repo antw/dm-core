@@ -46,18 +46,15 @@ module DataMapper
           return @child_key if defined?(@child_key)
 
           model           = child_model
-          repository_name = child_repository_name || parent_repository_name
-          properties      = model.properties(repository_name)
+          properties      = model.properties
 
           child_key = parent_key.zip(@child_properties || []).map do |parent_property, property_name|
             property_name ||= "#{name}_#{parent_property.name}".to_sym
 
             properties[property_name] || begin
               # create the property within the correct repository
-              DataMapper.repository(repository_name) do
-                type = parent_property.send(parent_property.type == DataMapper::Types::Boolean ? :type : :primitive)
-                model.property(property_name, type, child_key_options(parent_property))
-              end
+              type = parent_property.send(parent_property.type == DataMapper::Types::Boolean ? :type : :primitive)
+              model.property(property_name, type, child_key_options(parent_property))
             end
           end
 

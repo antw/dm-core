@@ -35,70 +35,24 @@ describe DataMapper::Model do
 
     describe '#copy' do
       with_alternate_adapter do
-        describe 'between identical models' do
-          before :all do
-            @return = @resources = @article_model.copy(@repository.name, @alternate_adapter.name)
-          end
-
-          it 'should return a Collection' do
-            @return.should be_a_kind_of(DataMapper::Collection)
-          end
-
-          it 'should return Resources' do
-            @return.each { |resource| resource.should be_a_kind_of(DataMapper::Resource) }
-          end
-
-          it 'should have each Resource set to the expected Repository' do
-            @resources.each { |resource| resource.repository.name.should == @alternate_adapter.name }
-          end
-
-          it 'should create the Resources in the expected Repository' do
-            @article_model.all(:repository => DataMapper.repository(@alternate_adapter.name)).should == @resources
-          end
+        before :all do
+          @return = @resources = @article_model.copy(@repository.name, @alternate_adapter.name)
         end
 
-        describe 'between different models' do
-          before :all do
-            @other.destroy
-            @article.destroy
-            @original.destroy
+        it 'should return a Collection' do
+          @return.should be_a_kind_of(DataMapper::Collection)
+        end
 
-            # make sure the default repository is empty
-            @article_model.all(:repository => @repository).should be_empty
+        it 'should return Resources' do
+          @return.each { |resource| resource.should be_a_kind_of(DataMapper::Resource) }
+        end
 
-            # add an extra property to the alternate model
-            DataMapper.repository(@alternate_adapter.name) do
-              @article_model.property :status, String, :default => 'new'
-            end
+        it 'should have each Resource set to the expected Repository' do
+          @resources.each { |resource| resource.repository.name.should == @alternate_adapter.name }
+        end
 
-            if @article_model.respond_to?(:auto_migrate!)
-              @article_model.auto_migrate!(@alternate_adapter.name)
-            end
-
-            # add new resources to the alternate repository
-            DataMapper.repository(@alternate_adapter.name) do
-              @heff1 = @article_model.create(:title => 'Alternate Repository', :author => @author)
-            end
-
-            # copy from the alternate to the default repository
-            @return = @resources = @article_model.copy(@alternate_adapter.name, :default)
-          end
-
-          it 'should return a Collection' do
-            @return.should be_a_kind_of(DataMapper::Collection)
-          end
-
-          it 'should return Resources' do
-            @return.each { |resource| resource.should be_a_kind_of(DataMapper::Resource) }
-          end
-
-          it 'should have each Resource set to the expected Repository' do
-            @resources.each { |resource| resource.repository.name.should == :default }
-          end
-
-          it 'should create the Resources in the expected Repository' do
-            @article_model.all.should == @resources
-          end
+        it 'should create the Resources in the expected Repository' do
+          @article_model.all(:repository => DataMapper.repository(@alternate_adapter.name)).should == @resources
         end
       end
     end
